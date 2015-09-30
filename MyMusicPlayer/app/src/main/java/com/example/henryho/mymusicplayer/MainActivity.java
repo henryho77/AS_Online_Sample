@@ -1,5 +1,6 @@
 package com.example.henryho.mymusicplayer;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -9,12 +10,15 @@ public class MainActivity extends AppCompatActivity {
 
     private Button btn_playOrStop;
     private boolean isMusicPlaying = false;
+    private Intent serviceIntent;
+    private String strAudioLink = "10.mp3";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        serviceIntent = new Intent(MainActivity.this, MyPlayService.class);
         initViews();
         setListeners();
     }
@@ -42,8 +46,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void playAudio() {
+        stopAudio();//播放之前先停止之前的服務
+        serviceIntent.putExtra("sentAudioLink", strAudioLink);//serviceIntent放入曲目名稱
+        startService(serviceIntent);//啟動服務
     }
 
     private void stopAudio() {
+        stopService(serviceIntent);//停止服務
     }
 }
