@@ -1,6 +1,9 @@
 package com.example.henryho.mymusicplayer;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -12,6 +15,8 @@ public class MainActivity extends AppCompatActivity {
     private boolean isMusicPlaying = false;
     private Intent serviceIntent;
     private String strAudioLink = "10.mp3";
+
+    private boolean isOnline;//3.判斷網路是否連線
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,12 +51,64 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void playAudio() {
-        stopAudio();//播放之前先停止之前的服務
-        serviceIntent.putExtra("sentAudioLink", strAudioLink);//serviceIntent放入曲目名稱
-        startService(serviceIntent);//啟動服務
+        //3.確認網路是否連線
+        checkConnectivity();
+        if (isOnline) {
+            //1.
+            stopAudio();//播放之前先停止之前的服務
+            serviceIntent.putExtra("sentAudioLink", strAudioLink);//serviceIntent放入曲目名稱
+            startService(serviceIntent);//啟動服務
+
+        } else {
+            //3.
+            /*if network connection failed, show AlertDialog*/
+            AlertDialog alertDialog = new AlertDialog.Builder(this).create();
+            alertDialog.setTitle("Network not connected...");
+            alertDialog.setMessage("Please connect to a network and try again");
+            alertDialog.setButton("OK", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                }
+            });
+            alertDialog.setIcon(R.mipmap.ic_launcher);
+            btn_playOrStop.setBackgroundResource(R.drawable.button_play_icon);
+            alertDialog.show();
+        }
     }
 
     private void stopAudio() {
         stopService(serviceIntent);//停止服務
+    }
+
+    //3.確認網路是否連線
+    private void checkConnectivity() {
+        ConnectivityManager connMgr = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
+
+        if (connMgr.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).isConnectedOrConnecting()
+                || connMgr.getNetworkInfo(ConnectivityManager.TYPE_WIFI).isConnectedOrConnecting()) {
+            isOnline = true;
+        } else {
+            isOnline = false;
+        }
+
+		/* this method need min api = 21 */
+		/*Network[] networks = connMgr.getAllNetworks();
+		Network network;
+		NetworkInfo networkInfo;
+		for (int i = 0; i < networks.length; i++) {
+			network = networks[i];
+			networkInfo = connMgr.getNetworkInfo(network);
+			if ((networkInfo.getType() == ConnectivityManager.TYPE_WIFI) &&
+					(networkInfo.getState().equals(NetworkInfo.State.CONNECTED)) ) {
+				isOnline = true;
+
+			} else if ((networkInfo.getType() == ConnectivityManager.TYPE_MOBILE) &&
+					(networkInfo.getState().equals(NetworkInfo.State.CONNECTED)) ) {
+				isOnline = true;
+
+			} else {
+				isOnline = false;
+			}
+		}*/
     }
 }
