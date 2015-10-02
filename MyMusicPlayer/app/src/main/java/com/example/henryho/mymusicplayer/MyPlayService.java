@@ -7,6 +7,9 @@ import android.app.Service;
 import android.content.Intent;
 import android.media.MediaPlayer;
 import android.os.IBinder;
+import android.telephony.PhoneStateListener;
+import android.telephony.TelephonyManager;
+import android.util.Log;
 import android.widget.Toast;
 
 import java.io.IOException;
@@ -21,6 +24,11 @@ public class MyPlayService extends Service implements MediaPlayer.OnBufferingUpd
     MediaPlayer mediaPlayer = new MediaPlayer();
     private String sntAudioLink;
     private static final int NOTIFICATION_ID = 1;//2.Set up the notification ID
+    //4.判斷電話是否進來的參數
+    private static final String TAG = "TEL_SERVICE";
+    private boolean isPauseInCall = false;
+    private PhoneStateListener phoneStateListener;
+    private TelephonyManager telephonyManager;
 
 
     @Override
@@ -39,6 +47,44 @@ public class MyPlayService extends Service implements MediaPlayer.OnBufferingUpd
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         //return super.onStartCommand(intent, flags, startId);
+
+        /*4.電話打進來時暫停音樂,掛斷時接續播放
+         *Manage incoming phone calls during playback.
+		 *Pause MediaPlayer on incoming,
+		 *resume on hangup. */
+        Log.v(TAG, "Starting telephony");
+        telephonyManager = (TelephonyManager) getSystemService(TELEPHONY_SERVICE);
+        Log.v(TAG, "Starting listener");
+        phoneStateListener = new PhoneStateListener() {
+            @Override
+            public void onCallStateChanged(int state, String incomingNumber) {
+                Log.v(TAG, "Starting CallStateChange");
+                switch (state) {
+                    case TelephonyManager.CALL_STATE_OFFHOOK:
+                    case TelephonyManager.CALL_STATE_RINGING:
+                        if (mediaPlayer != null) {
+                            pauseMedia();
+                            isPauseInCall = true;
+                        }
+                        break;
+                    case TelephonyManager.CALL_STATE_IDLE:
+                        //Phone idle. Start playing.
+                        if (mediaPlayer != null) {
+                            if (isPauseInCall) {
+                                isPauseInCall = false;
+                                playMedia();
+                            }
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            }
+        };
+
+        //4.Register the listener with the telephony manager
+        telephonyManager.listen(phoneStateListener,
+                PhoneStateListener.LISTEN_CALL_STATE);
 
 
         /*2.Insert notification start */
@@ -75,6 +121,11 @@ public class MyPlayService extends Service implements MediaPlayer.OnBufferingUpd
 
         //2.Cancel the notification
         cancelNotification();
+
+        //4.
+        if (phoneStateListener != null) {
+            telephonyManager.listen(phoneStateListener, PhoneStateListener.LISTEN_NONE);
+        }
     }
 
     @Override
@@ -130,15 +181,22 @@ public class MyPlayService extends Service implements MediaPlayer.OnBufferingUpd
     }
     /*===============================================================================*/
 
+    //1.
     private void playMedia() {
-        //1.
         if (!mediaPlayer.isPlaying()) {
             mediaPlayer.start();
         }
     }
 
+    //4.音樂暫停功能 Add for Telephony Manager
+    public void pauseMedia() {
+        if (mediaPlayer.isPlaying()) {
+            mediaPlayer.pause();
+        }
+    }
+
+    //1.
     private void stopMedia() {
-        //1.
         if (mediaPlayer.isPlaying()) {
             mediaPlayer.stop();
         }
