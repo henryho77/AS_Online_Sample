@@ -29,11 +29,15 @@ public class MyPlayService extends Service implements MediaPlayer.OnBufferingUpd
     private boolean isPauseInCall = false;
     private PhoneStateListener phoneStateListener;
     private TelephonyManager telephonyManager;
-
+    //5.Set up broadcast identifier and intent
+    public static final String BROADCAST_BUFFER = "com.example.henryho.mymusicplayer.broadcastbuffer";
+    Intent bufferIntent;
 
     @Override
     public void onCreate() {
         super.onCreate();
+
+        bufferIntent = new Intent(BROADCAST_BUFFER);//5.Instantiate bufferIntent to communicate with Activity for progress dialogue
 
         mediaPlayer.setOnBufferingUpdateListener(this);
         mediaPlayer.setOnCompletionListener(this);
@@ -94,8 +98,8 @@ public class MyPlayService extends Service implements MediaPlayer.OnBufferingUpd
         mediaPlayer.reset();//1.
         if (!mediaPlayer.isPlaying()) {
             try {
-                //1.Set up the MediaPlayer data source using the strAudioLink value
-                mediaPlayer.setDataSource("http://licensing.glowingpigs.com/Audio/" + sntAudioLink);
+                mediaPlayer.setDataSource("http://licensing.glowingpigs.com/Audio/" + sntAudioLink);//1.Set up the MediaPlayer data source using the strAudioLink value
+                sendBufferingBroadcast();//5.Send message to Activity to display progress dialogue
                 mediaPlayer.prepareAsync();//1.Prepare mediaPlayer
 
             } catch (IllegalArgumentException e) {
@@ -172,6 +176,7 @@ public class MyPlayService extends Service implements MediaPlayer.OnBufferingUpd
 
     @Override
     public void onPrepared(MediaPlayer mp) {
+        sendBufferCompleteBroadcast();//4.Send a message to activity to end progress dialogue
         playMedia();//1.
     }
 
@@ -239,5 +244,16 @@ public class MyPlayService extends Service implements MediaPlayer.OnBufferingUpd
     private void cancelNotification() {
         NotificationManager notiMgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         notiMgr.cancel(NOTIFICATION_ID);
+    }
+
+    //5.Send a message to Activity that audio is being prepared and buffering started
+    private void sendBufferingBroadcast() {
+        bufferIntent.putExtra("buffering", "1");
+        sendBroadcast(bufferIntent);
+    }
+    //5.Send a message to Activity that audio is prepared and ready to start playing
+    private void sendBufferCompleteBroadcast() {
+        bufferIntent.putExtra("buffering", "0");
+        sendBroadcast(bufferIntent);
     }
 }
