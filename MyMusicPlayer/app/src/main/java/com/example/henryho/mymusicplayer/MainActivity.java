@@ -149,7 +149,7 @@ public class MainActivity extends AppCompatActivity {
     private void showProgressDialog(Intent bufferIntent) {
         String bufferValue = bufferIntent.getStringExtra("buffering");
         int bufferIntValue = Integer.parseInt(bufferValue);
-        
+
         switch (bufferIntValue) {
             case 0:
                 // When the broadcasted "buffering" value is 0, dismiss the progress dialogue.
@@ -160,6 +160,12 @@ public class MainActivity extends AppCompatActivity {
             case 1:
                 // When the broadcasted "buffering" value is 1, show "Buffering" progress dialogue.
                 BufferDialogue();
+                break;
+
+            case 2:
+                //6.
+                // Listen for "2" to reset the button to a play button
+                btn_playOrStop.setBackgroundResource(R.drawable.button_play_icon);
                 break;
         }
     }

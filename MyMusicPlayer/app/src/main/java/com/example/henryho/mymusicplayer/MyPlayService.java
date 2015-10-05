@@ -4,7 +4,10 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.media.MediaPlayer;
 import android.os.IBinder;
 import android.telephony.PhoneStateListener;
@@ -33,6 +36,8 @@ public class MyPlayService extends Service implements MediaPlayer.OnBufferingUpd
     public static final String BROADCAST_BUFFER = "com.example.henryho.mymusicplayer.broadcastbuffer";
     Intent bufferIntent;
 
+    private int headsetSwitch = 1;//6.Declare headsetSwitch variable
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -46,6 +51,9 @@ public class MyPlayService extends Service implements MediaPlayer.OnBufferingUpd
         mediaPlayer.setOnPreparedListener(this);
         mediaPlayer.setOnSeekCompleteListener(this);
         mediaPlayer.reset();
+
+        //6.Register headset receiver
+        registerReceiver(headsetReceiver, new IntentFilter(Intent.ACTION_HEADSET_PLUG));
     }
 
     @Override
@@ -130,6 +138,12 @@ public class MyPlayService extends Service implements MediaPlayer.OnBufferingUpd
         if (phoneStateListener != null) {
             telephonyManager.listen(phoneStateListener, PhoneStateListener.LISTEN_NONE);
         }
+
+        //6.Unregister headsetReceiver
+        unregisterReceiver(headsetReceiver);
+
+        //6.Service ends, need to tell activity to display "Play" button
+        resetButtonPlayOrStopBroadcast();
     }
 
     @Override
@@ -255,5 +269,49 @@ public class MyPlayService extends Service implements MediaPlayer.OnBufferingUpd
     private void sendBufferCompleteBroadcast() {
         bufferIntent.putExtra("buffering", "0");
         sendBroadcast(bufferIntent);
+    }
+
+    //6.Send a message to Activity to reset the play button.
+    private void resetButtonPlayOrStopBroadcast() {
+        // Log.v(TAG, "BufferCompleteSent");
+        bufferIntent.putExtra("buffering", "2");
+        sendBroadcast(bufferIntent);
+    }
+
+    //6.If headset gets unplugged, stop music and service.
+    private BroadcastReceiver headsetReceiver = new BroadcastReceiver() {
+        private boolean headsetConnected = false;
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            // TODO Auto-generated method stub
+            // Log.v(TAG, "ACTION_HEADSET_PLUG Intent received");
+            if (intent.hasExtra("state")) {
+                if (headsetConnected && intent.getIntExtra("state", 0) == 0) {
+                    headsetConnected = false;
+                    headsetSwitch = 0;
+                    // Log.v(TAG, "State =  Headset disconnected");
+                } else if (!headsetConnected && intent.getIntExtra("state", 0) == 1) {
+                    headsetConnected = true;
+                    headsetSwitch = 1;
+                    // Log.v(TAG, "State =  Headset connected");
+                }
+            }
+
+            switch (headsetSwitch) {
+                case 0:
+                    headsetDisconnected();
+                    break;
+                case 1:
+                    break;
+            }
+        }
+
+    };
+
+    //6.
+    private void headsetDisconnected() {
+        stopMedia();
+        stopSelf();
     }
 }
