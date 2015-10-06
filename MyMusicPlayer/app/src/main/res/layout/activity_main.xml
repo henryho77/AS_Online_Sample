@@ -20,4 +20,11 @@
         android:layout_below="@+id/txt_songTitle"
         android:layout_centerHorizontal="true" />
 
+    <SeekBar
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/seekBar"
+        android:layout_below="@+id/btn_playOrStop"
+        android:layout_centerHorizontal="true" />
+
 </RelativeLayout>

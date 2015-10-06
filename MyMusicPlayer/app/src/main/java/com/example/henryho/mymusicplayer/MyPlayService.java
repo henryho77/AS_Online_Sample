@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.media.MediaPlayer;
+import android.os.Handler;
 import android.os.IBinder;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
@@ -38,18 +39,29 @@ public class MyPlayService extends Service implements MediaPlayer.OnBufferingUpd
 
     private int headsetSwitch = 1;//6.Declare headsetSwitch variable
 
+    //7.Variables for seekbar processing
+    String sntSeekPos;
+    int intSeekPos;
+    int mediaPosition;
+    int mediaMax;
+    Intent seekIntent;
+    private final Handler handler = new Handler();
+    private static int songEnded;
+    public static final String BROADCAST_ACTION = "com.example.henryho.mymusicplayer.seekprogress";
+
     @Override
     public void onCreate() {
         super.onCreate();
 
         bufferIntent = new Intent(BROADCAST_BUFFER);//5.Instantiate bufferIntent to communicate with Activity for progress dialogue
+        seekIntent = new Intent(BROADCAST_ACTION);//7.Set up intent for seekbar broadcast
 
         mediaPlayer.setOnBufferingUpdateListener(this);
         mediaPlayer.setOnCompletionListener(this);
         mediaPlayer.setOnErrorListener(this);
         mediaPlayer.setOnInfoListener(this);
         mediaPlayer.setOnPreparedListener(this);
-        mediaPlayer.setOnSeekCompleteListener(this);
+        mediaPlayer.setOnSeekCompleteListener(this);//7.
         mediaPlayer.reset();
 
         //6.Register headset receiver
@@ -117,6 +129,10 @@ public class MyPlayService extends Service implements MediaPlayer.OnBufferingUpd
             } catch (IOException e) {
             }
         }
+
+        //7.Set up seekbar handler
+        setupHandler();
+
         return START_STICKY;
     }
 
@@ -141,6 +157,9 @@ public class MyPlayService extends Service implements MediaPlayer.OnBufferingUpd
 
         //6.Unregister headsetReceiver
         unregisterReceiver(headsetReceiver);
+
+        //7.Stop the seekbar handler from sending updates to UI
+        handler.removeCallbacks(sendUpdatesToUI);
 
         //6.Service ends, need to tell activity to display "Play" button
         resetButtonPlayOrStopBroadcast();
@@ -313,5 +332,37 @@ public class MyPlayService extends Service implements MediaPlayer.OnBufferingUpd
     private void headsetDisconnected() {
         stopMedia();
         stopSelf();
+    }
+
+    //7.Send seekbar info to activity
+    private void setupHandler() {
+        handler.removeCallbacks(sendUpdatesToUI);//the method takes away,stops anything that the thread is going to be
+        handler.postDelayed(sendUpdatesToUI, 1000); // 1 second
+    }
+
+    //7.
+    //特別注意,handler.postDelayed(Runnable r, long delayMillis)這種直接使用Runnable的方式,
+    //並沒有開啟一個新的Thread,這個Runnable跟handler一樣都在MainThread(UiThread)跑,
+    //如果你想要開一個新的Thread,應該要宣告一個class繼承Thread,然後在裡面複寫run()方法.
+    private Runnable sendUpdatesToUI = new Runnable() {
+        @Override
+        public void run() {
+            LogMediaPosition();
+            handler.postDelayed(this, 1000); // 1 second
+        }
+    };
+
+    //7.
+    private void LogMediaPosition() {
+        if (mediaPlayer.isPlaying()) {
+            mediaPosition = mediaPlayer.getCurrentPosition();
+
+            mediaMax = mediaPlayer.getDuration();
+
+            seekIntent.putExtra("counter", String.valueOf(mediaPosition));
+            seekIntent.putExtra("mediamax", String.valueOf(mediaMax));
+            seekIntent.putExtra("song_ended", String.valueOf(songEnded));
+            sendBroadcast(seekIntent);
+        }
     }
 }

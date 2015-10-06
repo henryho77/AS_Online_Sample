@@ -12,6 +12,8 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
+import android.widget.SeekBar;
+import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -26,6 +28,12 @@ public class MainActivity extends AppCompatActivity {
     boolean mBufferBroadcastIsRegistered;
     private ProgressDialog pdBuff = null;
 
+    //7.Seekbar variables
+    private SeekBar seekBar;
+    private int seekMax;
+    private static int songEnded = 0;
+    boolean mBroadcastIsRegistered;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -39,11 +47,18 @@ public class MainActivity extends AppCompatActivity {
     //5.onPause, unregister broadcast receiver. To improve, also save screen data
     @Override
     protected void onPause() {
-        // Unregister broadcast receiver
+        //5.Unregister broadcast receiver
         if (mBufferBroadcastIsRegistered) {
             unregisterReceiver(broadcastBufferReceiver);
             mBufferBroadcastIsRegistered = false;
         }
+
+        //7.Unregister seekbar broadcast receiver
+        if (mBroadcastIsRegistered) {
+            unregisterReceiver(broadcastReceiver);
+            mBroadcastIsRegistered = false;
+        }
+
         super.onPause();
     }
 
@@ -51,11 +66,18 @@ public class MainActivity extends AppCompatActivity {
     //5.onResume register broadcast receiver. To improve, retrieve saved screen data
     @Override
     protected void onResume() {
-        // Register broadcast receiver
+        //5.Register broadcast receiver
         if (!mBufferBroadcastIsRegistered) {
             registerReceiver(broadcastBufferReceiver, new IntentFilter(MyPlayService.BROADCAST_BUFFER));
             mBufferBroadcastIsRegistered = true;
         }
+
+        //7.Register seekbar broadcast receiver
+        if (!mBroadcastIsRegistered) {
+            registerReceiver(broadcastReceiver, new IntentFilter(MyPlayService.BROADCAST_ACTION));
+            mBroadcastIsRegistered = true;
+        }
+
         super.onResume();
     }
 
@@ -64,6 +86,7 @@ public class MainActivity extends AppCompatActivity {
     private void initViews() {
         btn_playOrStop = (Button) findViewById(R.id.btn_playOrStop);
         btn_playOrStop.setBackgroundResource(R.drawable.button_play_icon);
+        seekBar = (SeekBar) findViewById(R.id.seekBar);
     }
 
     private void setListeners() {
@@ -92,6 +115,10 @@ public class MainActivity extends AppCompatActivity {
             serviceIntent.putExtra("sentAudioLink", strAudioLink);//serviceIntent放入曲目名稱
             startService(serviceIntent);//啟動服務
 
+            //7.Register receiver for seekbar
+            registerReceiver(broadcastReceiver, new IntentFilter(MyPlayService.BROADCAST_ACTION));
+            mBroadcastIsRegistered = true;
+
         } else {
             //3.
             /*if network connection failed, show AlertDialog*/
@@ -110,7 +137,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void stopAudio() {
-        stopService(serviceIntent);//停止服務
+
+        //7.Unregister broadcastReceiver for seekbar
+        if (mBroadcastIsRegistered) {
+            unregisterReceiver(broadcastReceiver);
+            mBroadcastIsRegistered = false;
+        }
+
+        stopService(serviceIntent);//1.停止服務
     }
 
     //3.確認網路是否連線
@@ -182,4 +216,28 @@ public class MainActivity extends AppCompatActivity {
             showProgressDialog(bufferIntent);
         }
     };
+
+    //7.Broadcast Receiver to update position of seekbar from service
+    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent serviceIntent) {
+            updateUI(serviceIntent);
+        }
+    };
+
+    //7.
+    private void updateUI(Intent serviceIntent) {
+        String counter = serviceIntent.getStringExtra("counter");
+        String mediamax = serviceIntent.getStringExtra("mediamax");
+        String strSongEnded = serviceIntent.getStringExtra("song_ended");
+        int seekProgress = Integer.parseInt(counter);
+        seekMax = Integer.parseInt(mediamax);
+        songEnded = Integer.parseInt(strSongEnded);
+        seekBar.setMax(seekMax);
+        seekBar.setProgress(seekProgress);
+        if (songEnded == 1) {
+            //songEnded = 1 代表歌曲播完了
+            btn_playOrStop.setBackgroundResource(R.drawable.button_play_icon);
+        }
+    }
 }
