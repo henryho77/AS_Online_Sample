@@ -72,6 +72,9 @@ public class MyPlayService extends Service implements MediaPlayer.OnBufferingUpd
     public int onStartCommand(Intent intent, int flags, int startId) {
         //return super.onStartCommand(intent, flags, startId);
 
+        //8.Set up receiver for seekbar change
+        registerReceiver(broadcastReceiver, new IntentFilter(MainActivity.BROADCAST_SEEKBAR));
+
         /*4.電話打進來時暫停音樂,掛斷時接續播放
          *Manage incoming phone calls during playback.
 		 *Pause MediaPlayer on incoming,
@@ -161,6 +164,9 @@ public class MyPlayService extends Service implements MediaPlayer.OnBufferingUpd
         //7.Stop the seekbar handler from sending updates to UI
         handler.removeCallbacks(sendUpdatesToUI);
 
+        //8.Unregister seekbar receiver
+        unregisterReceiver(broadcastReceiver);
+
         //6.Service ends, need to tell activity to display "Play" button
         resetButtonPlayOrStopBroadcast();
     }
@@ -215,7 +221,9 @@ public class MyPlayService extends Service implements MediaPlayer.OnBufferingUpd
 
     @Override
     public void onSeekComplete(MediaPlayer mp) {
-
+        if (!mediaPlayer.isPlaying()){
+            playMedia();
+        }
     }
     /*===============================================================================*/
 
@@ -363,6 +371,24 @@ public class MyPlayService extends Service implements MediaPlayer.OnBufferingUpd
             seekIntent.putExtra("mediamax", String.valueOf(mediaMax));
             seekIntent.putExtra("song_ended", String.valueOf(songEnded));
             sendBroadcast(seekIntent);
+        }
+    }
+
+    //8.Receive seekbar position if it has been changed by the user in the activity
+    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            updateSeekPos(intent);
+        }
+    };
+
+    //8.Update seek position from Activity
+    public void updateSeekPos(Intent intent) {
+        int seekPos = intent.getIntExtra("seekpos", 0);
+        if (mediaPlayer.isPlaying()) {
+            handler.removeCallbacks(sendUpdatesToUI);
+            mediaPlayer.seekTo(seekPos);
+            setupHandler();
         }
     }
 }

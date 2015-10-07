@@ -15,7 +15,7 @@ import android.widget.Button;
 import android.widget.SeekBar;
 import android.widget.Toast;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBarChangeListener{
 
     private Button btn_playOrStop;
     private boolean isMusicPlaying = false;
@@ -34,14 +34,19 @@ public class MainActivity extends AppCompatActivity {
     private static int songEnded = 0;
     boolean mBroadcastIsRegistered;
 
+    //8.Set up constant ID for broadcast of seekbar position
+    public static final String BROADCAST_SEEKBAR = "com.example.henryho.mymusicplayer.sendseekbar";
+    Intent intent;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        serviceIntent = new Intent(MainActivity.this, MyPlayService.class);
-        initViews();
-        setListeners();
+        serviceIntent = new Intent(MainActivity.this, MyPlayService.class);//1.
+        intent = new Intent(BROADCAST_SEEKBAR);//8.set up seekbar intent for broadcasting new position to service
+        initViews();//1.
+        setListeners();//1.
     }
 
     //5.onPause, unregister broadcast receiver. To improve, also save screen data
@@ -104,6 +109,9 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+
+        //8.Set up seekbar change listener
+        seekBar.setOnSeekBarChangeListener(this);
     }
 
     private void playAudio() {
@@ -239,5 +247,25 @@ public class MainActivity extends AppCompatActivity {
             //songEnded = 1 代表歌曲播完了
             btn_playOrStop.setBackgroundResource(R.drawable.button_play_icon);
         }
+    }
+
+    //8.When user manually moves seekbar, broadcast new position to service
+    @Override
+    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+        if (fromUser) {
+            int seekPos = seekBar.getProgress();
+            intent.putExtra("seekpos", seekPos);
+            sendBroadcast(intent);
+        }
+    }
+
+    //8.The following two methods are alternatives to track seekbar if moved.
+    @Override
+    public void onStartTrackingTouch(SeekBar seekBar) {
+    }
+
+    //8.
+    @Override
+    public void onStopTrackingTouch(SeekBar seekBar) {
     }
 }
