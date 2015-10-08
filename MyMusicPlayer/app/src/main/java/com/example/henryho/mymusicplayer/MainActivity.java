@@ -43,10 +43,16 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        serviceIntent = new Intent(MainActivity.this, MyPlayService.class);//1.
-        intent = new Intent(BROADCAST_SEEKBAR);//8.set up seekbar intent for broadcasting new position to service
-        initViews();//1.
-        setListeners();//1.
+        try {
+            serviceIntent = new Intent(MainActivity.this, MyPlayService.class);//1.
+            intent = new Intent(BROADCAST_SEEKBAR);//8.set up seekbar intent for broadcasting new position to service
+            initViews();//1.
+            setListeners();//1.
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(getApplicationContext(),
+                    e.getClass().getName() + " " + e.getMessage(), Toast.LENGTH_LONG).show();
+        }
     }
 
     //5.onPause, unregister broadcast receiver. To improve, also save screen data
@@ -121,7 +127,13 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
             //1.
             stopAudio();//播放之前先停止之前的服務
             serviceIntent.putExtra("sentAudioLink", strAudioLink);//serviceIntent放入曲目名稱
-            startService(serviceIntent);//啟動服務
+            try {
+                startService(serviceIntent);//啟動服務
+            } catch (Exception e) {
+                e.printStackTrace();
+                Toast.makeText(getApplicationContext(),
+                        e.getClass().getName() + " " + e.getMessage(), Toast.LENGTH_LONG).show();
+            }
 
             //7.Register receiver for seekbar
             registerReceiver(broadcastReceiver, new IntentFilter(MyPlayService.BROADCAST_ACTION));
@@ -146,13 +158,25 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
 
     private void stopAudio() {
 
-        //7.Unregister broadcastReceiver for seekbar
-        if (mBroadcastIsRegistered) {
-            unregisterReceiver(broadcastReceiver);
-            mBroadcastIsRegistered = false;
+        try {
+            //7.Unregister broadcastReceiver for seekbar
+            if (mBroadcastIsRegistered) {
+                unregisterReceiver(broadcastReceiver);
+                mBroadcastIsRegistered = false;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(getApplicationContext(),
+                    e.getClass().getName() + " " + e.getMessage(), Toast.LENGTH_LONG).show();
         }
 
-        stopService(serviceIntent);//1.停止服務
+        try {
+            stopService(serviceIntent);//1.停止服務
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(getApplicationContext(),
+                    e.getClass().getName() + " " + e.getMessage(), Toast.LENGTH_LONG).show();
+        }
     }
 
     //3.確認網路是否連線
