@@ -1,4 +1,4 @@
-package com.example.fbsample;
+package com.example.floginsample;
 
 import android.app.Activity;
 import android.os.Bundle;

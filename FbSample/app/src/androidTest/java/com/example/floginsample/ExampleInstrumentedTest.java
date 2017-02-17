@@ -1,4 +1,4 @@
-package com.example.fbsample;
+package com.example.floginsample;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
