@@ -7,7 +7,7 @@
     tools:context="com.example.floginsample.MainActivity">
 
     <Button
-        android:text="Fb Login"
+        android:text="使用FB登入"
         android:textColor="@color/colorWhite"
         android:background="@color/fbBlueColor"
         android:layout_width="100dp"
@@ -15,4 +15,13 @@
         android:layout_centerVertical="true"
         android:layout_centerHorizontal="true"
         android:id="@+id/btnFbLogin" />
+
+    <!--<com.facebook.login.widget.LoginButton-->
+        <!--android:id="@+id/btnFbLogin"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_gravity="center_horizontal"-->
+        <!--android:layout_centerVertical="true"-->
+        <!--android:layout_centerHorizontal="true" />-->
+
 </RelativeLayout>
