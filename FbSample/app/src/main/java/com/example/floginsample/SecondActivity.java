@@ -2,12 +2,10 @@ package com.example.floginsample;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.support.test.espresso.core.deps.guava.reflect.TypeToken;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
-import android.widget.SimpleAdapter;
 
 import com.example.floginsample.apiTool.ApiTool;
 import com.example.floginsample.apiTool.apiModel.TaggableFriend;
@@ -19,6 +17,7 @@ import com.facebook.GraphResponse;
 import com.facebook.HttpMethod;
 import com.facebook.login.LoginManager;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -89,12 +88,16 @@ public class SecondActivity extends Activity {
 
 
 //                                    String strTaggableFriendsResult = null;//將result(型別為JsonObject)轉成字串(內容是UserResult)
-//                                    strTaggableFriendsResult = response.getJSONObject().toString();
+//                                    try {
+//                                        strTaggableFriendsResult = response.getJSONObject().getJSONArray("data").toString();
+//                                    } catch (JSONException e) {
+//                                        e.printStackTrace();
+//                                    }
 //                                    Config.LOGD("strTaggableFriendsResult: " + strTaggableFriendsResult);
 //                                    Type type = new TypeToken<TaggableFriendsResult>(){}.getType();//建立TaggableFriendsResult的Type
 //                                    TaggableFriendsResult mResult =  new Gson().fromJson(strTaggableFriendsResult, type);//將Json格式的字串(內容是TaggableFriendsResult)藉由給定的TaggableFriendsResult的Type來轉回TaggableFriendsResult
 //                                    ArrayList<TaggableFriend> friends = mResult.data;
-
+//
 //                                    for (TaggableFriend friend : friends) {
 //                                        Config.LOGD(friend.name);
 //                                    }
