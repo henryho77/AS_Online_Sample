@@ -8,15 +8,6 @@
 
 
     <Button
-        android:text="Map"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/btnMap"
-        android:layout_alignBottom="@+id/radioGroup"
-        android:layout_alignRight="@+id/btnDetail"
-        android:layout_alignEnd="@+id/btnDetail" />
-
-    <Button
         android:id="@+id/btnPickPlace"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -29,42 +20,21 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Place Detail:"
-        android:layout_marginTop="14dp"
-        android:layout_below="@+id/etSearch"
+        android:layout_marginTop="23dp"
+        android:layout_below="@+id/spinner"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
 
     <Button
-        android:id="@+id/btnFilterByType"
+        android:id="@+id/btnSearch"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="FilterType"
-        android:layout_alignBaseline="@+id/btnPickPlace"
-        android:layout_alignBottom="@+id/btnPickPlace"
-        android:layout_toRightOf="@+id/btnPickPlace"
-        android:layout_toEndOf="@+id/btnPickPlace" />
-
-    <Button
-        android:id="@+id/btnShow"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Show"
-        android:layout_alignBaseline="@+id/btnFilterByType"
-        android:layout_alignBottom="@+id/btnFilterByType"
-        android:layout_toRightOf="@+id/btnFilterByType"
-        android:layout_toEndOf="@+id/btnFilterByType" />
-
-    <Button
-        android:id="@+id/btnDetail"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Detail"
-        android:layout_alignBaseline="@+id/btnShow"
-        android:layout_alignBottom="@+id/btnShow"
+        android:text="Search"
+        android:layout_alignTop="@+id/radioGroup"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
-        android:layout_marginRight="16dp"
-        android:layout_marginEnd="16dp" />
+        android:layout_marginRight="39dp"
+        android:layout_marginEnd="39dp" />
 
     <EditText
         android:id="@+id/etSearch"
@@ -77,7 +47,10 @@
         android:layout_marginTop="28dp"
         android:layout_below="@+id/radioGroup"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
+        android:layout_alignParentStart="true"
+        android:background="@color/colorLightBlue"
+        android:layout_alignRight="@+id/btnSearch"
+        android:layout_alignEnd="@+id/btnSearch" />
 
     <RadioGroup
         android:orientation="horizontal"
@@ -109,9 +82,11 @@
         android:id="@+id/spinner"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_toRightOf="@+id/btnPickPlace"
-        android:layout_alignBottom="@+id/etSearch"
-        android:layout_alignRight="@+id/btnShow"
-        android:layout_alignEnd="@+id/btnShow" />
+        android:layout_marginTop="20dp"
+        android:layout_below="@+id/etSearch"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignRight="@+id/etSearch"
+        android:layout_alignEnd="@+id/etSearch" />
 
 </RelativeLayout>

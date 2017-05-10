@@ -89,20 +89,27 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
             moveMap(place);
         }
 
+
+
         for (MyPlace place : MainActivity.myPlaces) {
-            Config.LOGD("id: " + place.getPlaceId()
-                    + ", latlng: " + place.getLatLng()
-                    + ", name: " + place.getName()
-                    + ", icon: " + place.getIcon()
-                    + ", openingHours: " + place.getOpeningHours().get("open_now"));
+            try {
+                Config.LOGD("id: " + place.getPlaceId()
+                        + ", latlng: " + place.getLatLng()
+                        + ", name: " + place.getName()
+                        + ", icon: " + place.getIcon()
+                        + ", openingHours: " + place.getOpeningHours().get("open_now"));
 
-            String openingHourStatus = "";
-            if (place.getOpeningHours().get("open_now").getAsBoolean())
-                openingHourStatus = "營業中\n";
-            else
-                openingHourStatus = "休息中\n";
+                String openingHourStatus = "";
+                if (place.getOpeningHours().get("open_now").getAsBoolean())
+                    openingHourStatus = "營業中\n";
+                else
+                    openingHourStatus = "休息中\n";
 
-            addMarker(place.getLatLng(), place.getName(), openingHourStatus);
+                addMarker(place.getLatLng(), place.getName(), openingHourStatus);
+            } catch (Exception e) {
+//                e.printStackTrace();
+                Config.LOGD("error: " + e.getMessage().toString());
+            }
         }
 
 
