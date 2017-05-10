@@ -211,17 +211,19 @@ public class MainActivity extends FragmentActivity implements GoogleApiClient.Co
                 return;
             }
 
+            Config.showProgress(MainActivity.this);
             Ion.with(MainActivity.this)
                     .load("https://maps.googleapis.com/maps/api/place/nearbysearch/json?location="
                             + latitude + "," + longitude
                             + "&radius=" + "1000"
-//                                        + "&type=" + "cafe"
+                            //+ "&type=" + "cafe"
                             + "&keyword=" + keyword
+                            + "&language=zh-TW"
                             + "&key=" + getString(R.string.google_maps_key))
                     .asJsonObject().setCallback(new FutureCallback<JsonObject>() {
                 @Override
                 public void onCompleted(Exception e, JsonObject result) {
-
+                    Config.dismissProgress();
                     if (result != null) {
                         Config.TOAST(MainActivity.this, "got result");
                         Config.LOGD("result.toString(): "  + result.toString());
@@ -238,10 +240,11 @@ public class MainActivity extends FragmentActivity implements GoogleApiClient.Co
                                         placeInfo.getAsJsonObject().getAsJsonObject("geometry").getAsJsonObject("location").get("lng").getAsDouble()
                                 );
                                 String name = placeInfo.getAsJsonObject().get("name").getAsString();
+                                String address = placeInfo.getAsJsonObject().get("vicinity").getAsString();
                                 String icon = placeInfo.getAsJsonObject().get("icon").getAsString();
                                 JsonObject openingHours = placeInfo.getAsJsonObject().getAsJsonObject("opening_hours");
 
-                                myPlaces.add(new MyPlace(placeId, latlng, name, icon, openingHours));
+                                myPlaces.add(new MyPlace(placeId, latlng, name, address, icon, openingHours));
                             }
 
                             startActivity(new Intent(MainActivity.this, MapActivity.class));
@@ -265,17 +268,19 @@ public class MainActivity extends FragmentActivity implements GoogleApiClient.Co
                 return;
             }
 
+            Config.showProgress(MainActivity.this);
             Ion.with(MainActivity.this)
                     .load("https://maps.googleapis.com/maps/api/place/nearbysearch/json?location="
                             + latitude + "," + longitude
                             + "&radius=" + "1000"
                             + "&type=" + type
-//                                    + "&keyword=" + "starbucks"
+                            //+ "&keyword=" + "starbucks"
+                            + "&language=zh-TW"
                             + "&key=" + getString(R.string.google_maps_key))
                     .asJsonObject().setCallback(new FutureCallback<JsonObject>() {
                 @Override
                 public void onCompleted(Exception e, JsonObject result) {
-
+                    Config.dismissProgress();
                     if (result != null) {
                         Config.TOAST(MainActivity.this, "got result");
                         Config.LOGD("result.toString(): "  + result.toString());
@@ -292,10 +297,11 @@ public class MainActivity extends FragmentActivity implements GoogleApiClient.Co
                                         placeInfo.getAsJsonObject().getAsJsonObject("geometry").getAsJsonObject("location").get("lng").getAsDouble()
                                 );
                                 String name = placeInfo.getAsJsonObject().get("name").getAsString();
+                                String address = placeInfo.getAsJsonObject().get("vicinity").getAsString();
                                 String icon = placeInfo.getAsJsonObject().get("icon").getAsString();
                                 JsonObject openingHours = placeInfo.getAsJsonObject().getAsJsonObject("opening_hours");
 
-                                myPlaces.add(new MyPlace(placeId, latlng, name, icon, openingHours));
+                                myPlaces.add(new MyPlace(placeId, latlng, name, address, icon, openingHours));
                             }
 
                             startActivity(new Intent(MainActivity.this, MapActivity.class));

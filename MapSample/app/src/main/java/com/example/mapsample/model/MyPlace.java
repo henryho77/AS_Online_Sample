@@ -11,12 +11,13 @@ public class MyPlace {
     String placeId;
     LatLng latLng;
     String name;
+    String address;
     String icon;
     JsonObject openingHours;
 
     public MyPlace() {}
 
-    public MyPlace(String placeId, LatLng latlng, String name, String icon, JsonObject openingHours) {
+    public MyPlace(String placeId, LatLng latlng, String name, String address, String icon, JsonObject openingHours) {
         if (placeId != null) {
             this.placeId = placeId;
         }
@@ -25,6 +26,9 @@ public class MyPlace {
         }
         if (name != null) {
             this.name = name;
+        }
+        if (address != null) {
+            this.address = address;
         }
         if (icon != null) {
             this.icon = icon;
@@ -56,6 +60,14 @@ public class MyPlace {
 
     public void setName (String name) {
         this.name = name;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
     }
 
     public String getIcon () {

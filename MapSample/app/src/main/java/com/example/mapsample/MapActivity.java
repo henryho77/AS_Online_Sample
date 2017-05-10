@@ -2,10 +2,12 @@ package com.example.mapsample;
 
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.support.test.espresso.core.deps.guava.reflect.TypeToken;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.view.View;
 
 import com.example.mapsample.app.Config;
 import com.example.mapsample.model.MyPlace;
@@ -20,6 +22,9 @@ import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.gson.Gson;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.assist.FailReason;
+import com.nostra13.universalimageloader.core.listener.ImageLoadingListener;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -35,7 +40,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
     public static ArrayList<StationPropertyResult> allStations = new ArrayList<>();
 
 //    int PLACE_PICKER_REQUEST = 1;
-
+    String message;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,21 +96,47 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
 
 
 
-        for (MyPlace place : MainActivity.myPlaces) {
+        for (final MyPlace place : MainActivity.myPlaces) {
             try {
                 Config.LOGD("id: " + place.getPlaceId()
                         + ", latlng: " + place.getLatLng()
                         + ", name: " + place.getName()
+                        + ", address: " + place.getAddress()
                         + ", icon: " + place.getIcon()
                         + ", openingHours: " + place.getOpeningHours().get("open_now"));
 
-                String openingHourStatus = "";
+                message = "";
                 if (place.getOpeningHours().get("open_now").getAsBoolean())
-                    openingHourStatus = "營業中\n";
+                    message = "(營業中) ";
                 else
-                    openingHourStatus = "休息中\n";
+                    message = "(休息中) ";
 
-                addMarker(place.getLatLng(), place.getName(), openingHourStatus);
+                message += "地址: " + place.getAddress() + "\n";
+                
+//                ImageLoader.getInstance().loadImage(place.getIcon(), new ImageLoadingListener() {
+//                    @Override
+//                    public void onLoadingStarted(String imageUri, View view) {
+//
+//                    }
+//
+//                    @Override
+//                    public void onLoadingFailed(String imageUri, View view, FailReason failReason) {
+//
+//                    }
+//
+//                    @Override
+//                    public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
+//
+//                        addMarker(place.getLatLng(), place.getName(), message, loadedImage);
+//                    }
+//
+//                    @Override
+//                    public void onLoadingCancelled(String imageUri, View view) {
+//
+//                    }
+//                });
+
+                addMarker(place.getLatLng(), place.getName(), message);
             } catch (Exception e) {
 //                e.printStackTrace();
                 Config.LOGD("error: " + e.getMessage().toString());
@@ -176,8 +207,19 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
     }
 
     private void addMarker(LatLng place, String title, String content) {
-        BitmapDescriptor icon =
-                BitmapDescriptorFactory.fromResource(R.drawable.mappin);
+        BitmapDescriptor icon = BitmapDescriptorFactory.fromResource(R.drawable.mappin);
+
+        MarkerOptions markerOptions = new MarkerOptions();
+        markerOptions.position(place)
+                .title(String.valueOf(title))
+                .snippet(content)
+                .icon(icon);
+
+        mMap.addMarker(markerOptions);
+    }
+
+    private void addMarker(LatLng place, String title, String content, Bitmap image) {
+        BitmapDescriptor icon = BitmapDescriptorFactory.fromBitmap(image);
 
         MarkerOptions markerOptions = new MarkerOptions();
         markerOptions.position(place)
