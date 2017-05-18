@@ -112,7 +112,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
                     message = "(休息中) ";
 
                 message += "地址: " + place.getAddress() + "\n";
-                
+
 //                ImageLoader.getInstance().loadImage(place.getIcon(), new ImageLoadingListener() {
 //                    @Override
 //                    public void onLoadingStarted(String imageUri, View view) {
