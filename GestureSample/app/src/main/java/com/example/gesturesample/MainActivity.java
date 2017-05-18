@@ -60,42 +60,42 @@ public class MainActivity extends Activity {
         matrix.postTranslate(focusX - scaledImageCenterX, focusY - scaledImageCenterY);//讓圖片呈現在中心點,所以要做個平移,中心點位置分別減掉水平跟垂直距離的一半
         imageView.setImageMatrix(matrix);
 
-//        moveGestureDetector = new MoveGestureDetector(getApplicationContext(), new MoveListener());
+        moveGestureDetector = new MoveGestureDetector(getApplicationContext(), new MoveListener());
     }
 
     private View.OnTouchListener onTouchListener = new View.OnTouchListener() {
         @Override
         public boolean onTouch(View v, MotionEvent event) {
-//            Config.LOGD("onTouch");
-//            if (event.getAction() == MotionEvent.ACTION_DOWN) {
-//                Config.LOGD("ACTION_DOWN");
-//            }
-            if (event.getAction() == MotionEvent.ACTION_MOVE) {
-                Config.LOGD("ACTION_MOVE");
-                focusX = event.getX();
-                focusY = event.getY();
+            moveGestureDetector.onTouchEvent(event);
 
-                float scaledImageCenterX = (imageWidth * scaleFactor) / 2;
-                float scaledImageCenterY = (imageHeight * scaleFactor) / 2;
+            //重新餵值
+            float scaledImageCenterX = (imageWidth * scaleFactor) / 2;
+            float scaledImageCenterY = (imageHeight * scaleFactor) / 2;
 
-                matrix.reset();
-                matrix.postScale(scaleFactor, scaleFactor);
-                matrix.postRotate(rotationDegrees);
-                matrix.postTranslate(focusX - scaledImageCenterX, focusY - scaledImageCenterY);//讓圖片呈現在中心點,所以要做個平移,中心點位置分別減掉水平跟垂直距離的一半
-                imageView.setImageMatrix(matrix);
-            }
-//            if (event.getAction() == MotionEvent.ACTION_UP) {
-//                Config.LOGD("ACTION_UP");
-//            }
+            matrix.reset();
+            matrix.postScale(scaleFactor, scaleFactor);
+            matrix.postRotate(rotationDegrees);
+            matrix.postTranslate(focusX - scaledImageCenterX, focusY - scaledImageCenterY);//讓圖片呈現在中心點,所以要做個平移,中心點位置分別減掉水平跟垂直距離的一半
+            imageView.setImageMatrix(matrix);
+
             return true;
         }
     };
 
-    class MoveListener extends MoveGestureDetector.SimpleOnMoveGestureListener {
+    class MoveListener implements MoveGestureDetector.OnMoveGestureListener{
         @Override
         public boolean onMove(MoveGestureDetector detector) {
+            return false;
+        }
 
-            return super.onMove(detector);
+        @Override
+        public boolean onMoveBegin(MoveGestureDetector detector) {
+            return true;
+        }
+
+        @Override
+        public void onMoveEnd(MoveGestureDetector detector) {
+            // Do nothing, overridden implementation may be used
         }
     }
 }
