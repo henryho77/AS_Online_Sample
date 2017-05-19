@@ -12,6 +12,7 @@ import android.widget.ImageView;
 
 import com.example.gesturesample.app.Config;
 import com.example.gesturesample.multitouch.MoveGestureDetector;
+import com.example.gesturesample.multitouch.RotateGestureDetector;
 
 public class MainActivity extends Activity {
 
@@ -26,6 +27,7 @@ public class MainActivity extends Activity {
     private int imageHeight, imageWidth;
 
     private MoveGestureDetector moveGestureDetector;
+    private RotateGestureDetector rotateGestureDetector;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,12 +64,14 @@ public class MainActivity extends Activity {
         imageView.setImageMatrix(matrix);
 
         moveGestureDetector = new MoveGestureDetector(getApplicationContext(), new MoveListener());
+        rotateGestureDetector = new RotateGestureDetector(getApplicationContext(), new RotateListener());
     }
 
     private View.OnTouchListener onTouchListener = new View.OnTouchListener() {
         @Override
         public boolean onTouch(View v, MotionEvent event) {
             moveGestureDetector.onTouchEvent(event);
+            rotateGestureDetector.onTouchEvent(event);
 
             //重新餵值
             float scaledImageCenterX = (imageWidth * scaleFactor) / 2;
@@ -83,7 +87,7 @@ public class MainActivity extends Activity {
         }
     };
 
-    class MoveListener implements MoveGestureDetector.OnMoveGestureListener{
+    private class MoveListener implements MoveGestureDetector.OnMoveGestureListener{
         @Override
         public boolean onMove(MoveGestureDetector detector) {
             PointF delta = detector.getFocusDelta();
@@ -99,6 +103,25 @@ public class MainActivity extends Activity {
 
         @Override
         public void onMoveEnd(MoveGestureDetector detector) {
+            // Do nothing, overridden implementation may be used
+        }
+    }
+
+    private class RotateListener implements RotateGestureDetector.OnRotateGestureListener {
+
+        @Override
+        public boolean onRotate(RotateGestureDetector detector) {
+            rotationDegrees -= detector.getRotationDegreesDelta();
+            return true;
+        }
+
+        @Override
+        public boolean onRotateBegin(RotateGestureDetector detector) {
+            return true;
+        }
+
+        @Override
+        public void onRotateEnd(RotateGestureDetector detector) {
             // Do nothing, overridden implementation may be used
         }
     }

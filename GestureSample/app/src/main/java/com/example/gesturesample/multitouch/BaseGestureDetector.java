@@ -26,7 +26,7 @@ import android.view.MotionEvent;
 
 public abstract class BaseGestureDetector {
     //protected的變數都可以讓繼承這個class的孩子直接使用
-    private Context context;
+    protected Context context;//TwoFingerGestureDetector會用到它
     protected boolean gestureInProgress;
 
     protected MotionEvent prevEvent;
