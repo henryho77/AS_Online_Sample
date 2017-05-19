@@ -2,6 +2,7 @@ package com.example.gesturesample;
 
 import android.app.Activity;
 import android.graphics.Matrix;
+import android.graphics.PointF;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.Display;
@@ -85,7 +86,10 @@ public class MainActivity extends Activity {
     class MoveListener implements MoveGestureDetector.OnMoveGestureListener{
         @Override
         public boolean onMove(MoveGestureDetector detector) {
-            return false;
+            PointF delta = detector.getFocusDelta();
+            focusX += delta.x;
+            focusY += delta.y;
+            return true;
         }
 
         @Override

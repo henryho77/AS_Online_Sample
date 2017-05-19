@@ -39,9 +39,9 @@ public class MoveGestureDetector extends BaseGestureDetector{
     private static final PointF FOCUS_DELTA_ZERO = new PointF();
     private OnMoveGestureListener listener;
 
-    private PointF prevFocusInternal;//internal代表手指頭之間的中心點(prev)
+    private PointF prevFocusInternal;//internal代表手指頭之間的中心點(prev),這個過程中手指頭數量可能改變,所以用internal,最後用internal來算出來的結果得到external
     private PointF currFocusInternal;//internal代表手指頭之間的中心點(curr)
-    private PointF focusExternal = new PointF();//
+    private PointF focusExternal = new PointF();//代表指頭數量確定後且移動之後的中心點位置
     private PointF focusDeltaExternal = new PointF();//external代表internal中心點找好後,前(prev)跟後(curr)internal中心點的平移量
 
     public MoveGestureDetector(Context context, OnMoveGestureListener listener) {
@@ -79,12 +79,11 @@ public class MoveGestureDetector extends BaseGestureDetector{
                 //第一次之後的所有ACTION_MOVE會進來這邊
                 updateStateByEvent(event);//更新移動的中心點
 
-                //下面這段是用來更精確的判斷手指按壓狀況,不使用也沒關係
-                // Only accept the event if our relative pressure is within
-                // a certain limit. This can help filter shaky data as a
-                // finger is lifted.
+                /* 下面這段是用來更精確的判斷手指按壓狀況,不使用也沒關係
+                 * Only accept the event if our relative pressure is within a certain limit.
+                 * This can help filter shaky data as a finger is lifted. */
                 if (currPressure / prevPressure > PRESSURE_THRESHOLD) {
-                    final boolean updatePrevious = listener.onMove(this);//目前onMove只回傳false,也就是沒用上的意思
+                    final boolean updatePrevious = listener.onMove(this);//這邊回傳計算後的結果
                     if (updatePrevious) {
                         prevEvent.recycle();
                         prevEvent = MotionEvent.obtain(event);
@@ -94,7 +93,7 @@ public class MoveGestureDetector extends BaseGestureDetector{
         }
     }
 
-    //如果沒有複寫也可以直接用updateStateByEvent(curr);就會直貼使用父方法
+    //如果沒有複寫也可以直接用updateStateByEvent(curr);就會直接使用父方法
     @Override
     protected void updateStateByEvent(MotionEvent curr) {
         super.updateStateByEvent(curr);//這邊先執行一次父類別方法
@@ -135,6 +134,14 @@ public class MoveGestureDetector extends BaseGestureDetector{
         }
 
         return new PointF(x/pCount, y/pCount);//總量除以個數得到平均的x與y值,也就是幾個手指頭的中心點
+    }
+
+    public float getFocusX() {
+        return focusExternal.x;
+    }
+
+    public float getFocusY() {
+        return focusExternal.y;
     }
 
     //取得先跟後之間中心點的平移量
